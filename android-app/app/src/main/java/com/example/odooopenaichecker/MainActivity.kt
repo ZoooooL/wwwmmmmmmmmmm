@@ -8,7 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import java.io.BufferedReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.net.URL
+import java.net.UnknownHostException
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,44 +35,68 @@ class MainActivity : AppCompatActivity() {
                 openaiApiKey = openaiApiKey.text.toString().trim()
             )
 
-            resultText.text = "Checking..."
+            val validationError = validateInputs(values)
+            if (validationError != null) {
+                resultText.text = validationError
+                return@setOnClickListener
+            }
+
+            resultText.text = getString(R.string.checking)
+            button.isEnabled = false
             Thread {
                 val result = runChecks(values)
-                runOnUiThread { resultText.text = result }
+                runOnUiThread {
+                    if (!isFinishing && !isDestroyed) {
+                        resultText.text = result
+                        button.isEnabled = true
+                    }
+                }
             }.start()
         }
+    }
+
+    private fun validateInputs(values: InputValues): String? {
+        if (!values.odooUrl.startsWith("http://") && !values.odooUrl.startsWith("https://")) {
+            return getString(R.string.error_invalid_odoo_url)
+        }
+        try {
+            URL(values.odooUrl)
+        } catch (_: Exception) {
+            return getString(R.string.error_invalid_odoo_url)
+        }
+        if (values.odooDb.isEmpty() || values.odooUsername.isEmpty() || values.odooApiKey.isEmpty()) {
+            return getString(R.string.error_missing_odoo_fields)
+        }
+        if (values.openaiApiKey.isEmpty()) {
+            return getString(R.string.error_missing_openai_key)
+        }
+        return null
     }
 
     private fun runChecks(values: InputValues): String {
         val odooResult = checkOdoo(values)
         val openAiResult = checkOpenAI(values.openaiApiKey)
-        return "Odoo: $odooResult\n\nOpenAI: $openAiResult"
+        return getString(R.string.result_template, odooResult, openAiResult)
     }
 
     private fun checkOdoo(values: InputValues): String {
-        if (!values.odooUrl.startsWith("http://") && !values.odooUrl.startsWith("https://")) {
-            return "Invalid Odoo URL. Must start with http:// or https://"
-        }
-        if (values.odooDb.isEmpty() || values.odooUsername.isEmpty() || values.odooApiKey.isEmpty()) {
-            return "Missing Odoo DB/Username/API Key"
-        }
+        val endpoint = values.odooUrl.trimEnd('/') + "/xmlrpc/2/common"
+        val payload = """
+            <?xml version="1.0"?>
+            <methodCall>
+              <methodName>authenticate</methodName>
+              <params>
+                <param><value><string>${xmlEscape(values.odooDb)}</string></value></param>
+                <param><value><string>${xmlEscape(values.odooUsername)}</string></value></param>
+                <param><value><string>${xmlEscape(values.odooApiKey)}</string></value></param>
+                <param><value><struct></struct></value></param>
+              </params>
+            </methodCall>
+        """.trimIndent()
 
+        var conn: HttpURLConnection? = null
         return try {
-            val endpoint = values.odooUrl.trimEnd('/') + "/xmlrpc/2/common"
-            val payload = """
-                <?xml version="1.0"?>
-                <methodCall>
-                  <methodName>authenticate</methodName>
-                  <params>
-                    <param><value><string>${xmlEscape(values.odooDb)}</string></value></param>
-                    <param><value><string>${xmlEscape(values.odooUsername)}</string></value></param>
-                    <param><value><string>${xmlEscape(values.odooApiKey)}</string></value></param>
-                    <param><value><struct></struct></value></param>
-                  </params>
-                </methodCall>
-            """.trimIndent()
-
-            val conn = URL(endpoint).openConnection() as HttpURLConnection
+            conn = URL(endpoint).openConnection() as HttpURLConnection
             conn.requestMethod = "POST"
             conn.connectTimeout = 15000
             conn.readTimeout = 15000
@@ -86,24 +112,41 @@ class MainActivity : AppCompatActivity() {
 
             val uid = Regex("<int>(\\d+)</int>").find(response)?.groupValues?.get(1)
             if (uid != null && uid != "0") {
-                "Connected (uid=$uid)"
+                getString(R.string.status_odoo_connected, uid)
             } else {
-                "Authentication failed"
+                val fault = Regex("<name>faultString</name>\\s*<value><string>(.*?)</string></value>", RegexOption.DOT_MATCHES_ALL)
+                    .find(response)
+                    ?.groupValues
+                    ?.get(1)
+                    ?.replace("\\n", " ")
+                    ?.trim()
+
+                if (fault.isNullOrEmpty()) {
+                    getString(R.string.status_odoo_auth_failed)
+                } else {
+                    getString(R.string.status_failed_http_with_reason, conn.responseCode.toString(), fault.take(140))
+                }
             }
+        } catch (_: UnknownHostException) {
+            getString(R.string.status_error_network)
+        } catch (_: SocketTimeoutException) {
+            getString(R.string.status_error_network)
         } catch (e: Exception) {
-            "Error: ${e.message}"
+            getString(R.string.status_error, e.message ?: getString(R.string.unknown_error))
+        } finally {
+            conn?.disconnect()
         }
     }
 
     private fun checkOpenAI(apiKey: String): String {
-        if (apiKey.isEmpty()) return "Missing OpenAI API Key"
-
+        var conn: HttpURLConnection? = null
         return try {
-            val conn = URL("https://api.openai.com/v1/models").openConnection() as HttpURLConnection
+            conn = URL("https://api.openai.com/v1/models").openConnection() as HttpURLConnection
             conn.requestMethod = "GET"
             conn.connectTimeout = 15000
             conn.readTimeout = 15000
             conn.setRequestProperty("Authorization", "Bearer $apiKey")
+            conn.setRequestProperty("Accept", "application/json")
 
             val responseBody = (if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream)
                 ?.bufferedReader()
@@ -111,12 +154,22 @@ class MainActivity : AppCompatActivity() {
                 .orEmpty()
 
             if (conn.responseCode == 200) {
-                "Connected (HTTP 200)"
+                getString(R.string.status_openai_connected)
             } else {
-                "Failed (HTTP ${conn.responseCode}): ${responseBody.take(120)}"
+                getString(
+                    R.string.status_failed_http_with_reason,
+                    conn.responseCode.toString(),
+                    responseBody.take(140)
+                )
             }
+        } catch (_: UnknownHostException) {
+            getString(R.string.status_error_network)
+        } catch (_: SocketTimeoutException) {
+            getString(R.string.status_error_network)
         } catch (e: Exception) {
-            "Error: ${e.message}"
+            getString(R.string.status_error, e.message ?: getString(R.string.unknown_error))
+        } finally {
+            conn?.disconnect()
         }
     }
 

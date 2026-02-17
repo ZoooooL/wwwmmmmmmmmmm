@@ -78,6 +78,19 @@ gradle -p android-app :app:assembleRelease
 
 وسيرفع artifact باسم `app-release-apk`.
 
+### 5) نشر مباشر على Google Play (Live)
+يوجد workflow جاهز:
+- `.github/workflows/android-live-release.yml`
+
+المتطلبات (GitHub Secrets):
+- `KEYSTORE_BASE64`
+- `KEYSTORE_PASSWORD`
+- `KEY_ALIAS`
+- `KEY_PASSWORD`
+- `PLAY_SERVICE_ACCOUNT_JSON_BASE64` (حساب خدمة Google Play Console بصيغة base64)
+
+ثم شغّل workflow يدويًا واختر `track` (مثل: `internal` أو `production`).
+
 ---
 
 ## تنبيه أمني مهم

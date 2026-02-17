@@ -1,3 +1,28 @@
 <resources>
-    <string name="app_name">Odoo OpenAI Checker</string>
+    <string name="app_name">Mâläz</string>
+    <string name="logo_mark">Mâ</string>
+    <string name="subtitle">Smart Odoo &amp; OpenAI Connection Checker</string>
+    <string name="hint_odoo_url">Odoo URL (https://...)</string>
+    <string name="hint_odoo_db">Odoo Database</string>
+    <string name="hint_odoo_username">Odoo Username (email)</string>
+    <string name="hint_odoo_api_key">Odoo API Key</string>
+    <string name="hint_openai_api_key">OpenAI API Key</string>
+    <string name="check_connections">Check Connections</string>
+    <string name="result_placeholder">Ready to check your connections.</string>
+    <string name="checking">Checking… please wait</string>
+
+    <string name="error_invalid_odoo_url">Invalid Odoo URL. Must start with http:// or https://</string>
+    <string name="error_missing_odoo_fields">Missing Odoo DB / Username / API Key</string>
+    <string name="error_missing_openai_key">Missing OpenAI API Key</string>
+
+    <string name="result_template">Odoo: %1$s
+
+OpenAI: %2$s</string>
+    <string name="status_odoo_connected">Connected (uid=%1$s)</string>
+    <string name="status_openai_connected">Connected (HTTP 200)</string>
+    <string name="status_odoo_auth_failed">Authentication failed</string>
+    <string name="status_failed_http_with_reason">Failed (HTTP %1$s): %2$s</string>
+    <string name="status_error">Error: %1$s</string>
+    <string name="status_error_network">Network error. Check internet and try again.</string>
+    <string name="unknown_error">Unknown error</string>
 </resources>
