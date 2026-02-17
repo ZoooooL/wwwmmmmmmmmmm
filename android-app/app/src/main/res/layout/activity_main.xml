@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/odooUrl"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Odoo URL (https://...)"
+            android:inputType="textUri"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/odooDb"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Odoo DB"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/odooUrl" />
+
+        <EditText
+            android:id="@+id/odooUsername"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Odoo Username"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/odooDb" />
+
+        <EditText
+            android:id="@+id/odooApiKey"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Odoo API Key"
+            android:inputType="textPassword"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/odooUsername" />
+
+        <EditText
+            android:id="@+id/openaiApiKey"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="OpenAI API Key"
+            android:inputType="textPassword"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/odooApiKey" />
+
+        <Button
+            android:id="@+id/checkButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Check Connections"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/openaiApiKey" />
+
+        <TextView
+            android:id="@+id/resultText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Result will appear here"
+            android:textIsSelectable="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/checkButton" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

@@ -1,54 +1,24 @@
 ## Odoo + OpenAI Connection Setup
 
-تمت مراجعة السكربت وتحسينه ليكون جاهزًا للرفع على GitHub بشكل أفضل:
-- تحميل تلقائي من `.env` بدون مكتبات خارجية.
-- Timeout للشبكة حتى لا يعلق السكربت.
-- إظهار مفاتيح بشكل مخفي (Masked) في الرسائل.
-- اختبارات وحدة + CI على GitHub Actions.
+المستودع الآن يحتوي جزئين:
+1) سكربت Python لفحص الاتصال.
+2) تطبيق Android (Kotlin) داخل `android-app/` يمكن بناءه إلى APK.
 
 ---
 
-## 1) إعداد المتغيرات
+## Python verifier
 
-انسخ ملف القالب ثم أضف بياناتك:
-
+### 1) إعداد المتغيرات
 ```bash
 cp .env.example .env
 ```
 
-املأ القيم التالية:
-- `ODOO_URL`
-- `ODOO_DB`
-- `ODOO_USERNAME`
-- `ODOO_API_KEY`
-- `OPENAI_API_KEY`
-
-> ملاحظة: لا ترفع `.env` على GitHub.
-
----
-
-## 2) تشغيل فحص الاتصال
-
+### 2) تشغيل الفحص
 ```bash
 python3 scripts/verify_connections.py
 ```
 
-خيارات إضافية:
-
-```bash
-python3 scripts/verify_connections.py --timeout 30
-python3 scripts/verify_connections.py --env-file .env.production
-python3 scripts/verify_connections.py --skip-env-file
-```
-
-> ملاحظة: قيمة `--timeout` يجب أن تكون أكبر من 0.
-
-سيعرض السكربت JSON يحتوي نتيجة كل خدمة.
-
----
-
-## 3) الاختبارات المحلية
-
+### 3) اختبارات السكربت
 ```bash
 python3 -m py_compile scripts/verify_connections.py
 python3 -m unittest discover -s tests -v
@@ -56,27 +26,35 @@ python3 -m unittest discover -s tests -v
 
 ---
 
-## 4) الرفع على GitHub
+## Android APK
 
-بعد كل Push/PR سيتم تشغيل CI تلقائيًا من الملف:
-- `.github/workflows/ci.yml`
+### مكان التطبيق
+- `android-app/`
+- الحزمة: `com.example.odooopenaichecker`
+
+### ماذا يفعل التطبيق؟
+- شاشة إدخال بيانات Odoo + OpenAI.
+- زر **Check Connections**.
+- التحقق من:
+  - Odoo عبر `xmlrpc/2/common` (authenticate)
+  - OpenAI عبر `GET /v1/models`
+- عرض النتيجة مباشرة داخل التطبيق.
+
+### بناء APK محليًا (Android Studio)
+1. افتح مجلد `android-app` في Android Studio.
+2. انتظر مزامنة Gradle.
+3. Build > Build APK(s).
+
+### بناء APK عبر GitHub Actions
+أضفنا Workflow جاهز:
+- `.github/workflows/android-apk.yml`
+
+يمكنك تشغيله يدويًا من تبويب Actions، وسيتم رفع ملف:
+- `app-debug.apk` كـ artifact.
 
 ---
 
-## 5) بخصوص APK
-
-المستودع الحالي لا يحتوي مشروع Android/Flutter كامل لتوليد APK مباشرة.
-
-لإنشاء APK تحتاج واحدًا من المسارين:
-1. إنشاء تطبيق Android (Kotlin/Java) أو Flutter.
-2. دمج منطق الربط داخل التطبيق ثم بناء APK عبر Android Studio أو CI.
-
-إذا أردت، أستطيع في الخطوة التالية تجهيز لك هيكل مشروع Flutter/Android جاهز للبناء إلى APK.
-
----
-
-## تنبيه أمني
-
-المفاتيح التي تمت مشاركتها علنًا يجب اعتبارها مكشوفة، ويجب تدويرها (Rotate) فورًا:
+## تنبيه أمني مهم
+أي مفاتيح تمت مشاركتها علنًا تعتبر مكشوفة ويجب تدويرها فورًا:
 - Odoo API Key
 - OpenAI API Key
