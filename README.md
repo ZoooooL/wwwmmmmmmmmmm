@@ -1,24 +1,20 @@
 ## Odoo + OpenAI Connection Setup
 
-المستودع الآن يحتوي جزئين:
+المستودع يحتوي:
 1) سكربت Python لفحص الاتصال.
-2) تطبيق Android (Kotlin) داخل `android-app/` يمكن بناءه إلى APK.
+2) تطبيق Android داخل `android-app/` قابل لإخراج APK (Debug/Release Signed).
 
 ---
 
 ## Python verifier
 
-### 1) إعداد المتغيرات
+### إعداد وتشغيل
 ```bash
 cp .env.example .env
-```
-
-### 2) تشغيل الفحص
-```bash
 python3 scripts/verify_connections.py
 ```
 
-### 3) اختبارات السكربت
+### اختبارات السكربت
 ```bash
 python3 -m py_compile scripts/verify_connections.py
 python3 -m unittest discover -s tests -v
@@ -30,31 +26,60 @@ python3 -m unittest discover -s tests -v
 
 ### مكان التطبيق
 - `android-app/`
-- الحزمة: `com.example.odooopenaichecker`
+- package: `com.example.odooopenaichecker`
 
-### ماذا يفعل التطبيق؟
-- شاشة إدخال بيانات Odoo + OpenAI.
-- زر **Check Connections**.
-- التحقق من:
-  - Odoo عبر `xmlrpc/2/common` (authenticate)
-  - OpenAI عبر `GET /v1/models`
-- عرض النتيجة مباشرة داخل التطبيق.
+### Debug APK
+- محليًا (Android Studio): افتح `android-app` ثم Build APK(s).
+- عبر GitHub Actions: workflow `Build Android APK` يرفع `app-debug.apk`.
 
-### بناء APK محليًا (Android Studio)
-1. افتح مجلد `android-app` في Android Studio.
-2. انتظر مزامنة Gradle.
-3. Build > Build APK(s).
+---
 
-### بناء APK عبر GitHub Actions
-أضفنا Workflow جاهز:
-- `.github/workflows/android-apk.yml`
+## Release Signed APK (جاهز للتثبيت)
 
-يمكنك تشغيله يدويًا من تبويب Actions، وسيتم رفع ملف:
-- `app-debug.apk` كـ artifact.
+### 1) إنشاء keystore محليًا
+```bash
+keytool -genkeypair \
+  -v \
+  -keystore android-app/keystore/release-key.jks \
+  -alias release \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000
+```
+
+### 2) إعداد توقيع محلي
+```bash
+cp android-app/keystore.properties.example android-app/keystore.properties
+```
+
+ثم عدّل القيم:
+- `KEYSTORE_FILE=keystore/release-key.jks`
+- `KEYSTORE_PASSWORD=...`
+- `KEY_ALIAS=release`
+- `KEY_PASSWORD=...`
+
+### 3) بناء Release APK محليًا
+```bash
+gradle -p android-app :app:assembleRelease
+```
+
+الملف الناتج:
+- `android-app/app/build/outputs/apk/release/app-release.apk`
+
+### 4) بناء Release Signed APK عبر GitHub Actions
+أضف Secrets في GitHub Repository:
+- `KEYSTORE_BASE64` (محتوى ملف `.jks` بعد تحويله base64)
+- `KEYSTORE_PASSWORD`
+- `KEY_ALIAS`
+- `KEY_PASSWORD`
+
+ثم شغّل workflow:
+- `.github/workflows/android-release.yml`
+
+وسيرفع artifact باسم `app-release-apk`.
 
 ---
 
 ## تنبيه أمني مهم
-أي مفاتيح تمت مشاركتها علنًا تعتبر مكشوفة ويجب تدويرها فورًا:
-- Odoo API Key
-- OpenAI API Key
+أي مفاتيح/API Keys تمت مشاركتها علنًا يجب تدويرها فورًا.
+وكذلك يجب حفظ `keystore` وبيانات التوقيع في مكان آمن جدًا.

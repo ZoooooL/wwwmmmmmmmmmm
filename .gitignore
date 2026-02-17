@@ -2,3 +2,6 @@
 __pycache__/
 
 android-app/.gradle/
+android-app/keystore.properties
+android-app/keystore/*.jks
+android-app/keystore/*.keystore
