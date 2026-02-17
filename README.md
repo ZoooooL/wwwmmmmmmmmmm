@@ -41,6 +41,8 @@ python3 scripts/verify_connections.py --env-file .env.production
 python3 scripts/verify_connections.py --skip-env-file
 ```
 
+> ملاحظة: قيمة `--timeout` يجب أن تكون أكبر من 0.
+
 سيعرض السكربت JSON يحتوي نتيجة كل خدمة.
 
 ---

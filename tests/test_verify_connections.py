@@ -2,7 +2,7 @@ import os
 import tempfile
 import unittest
 
-from scripts.verify_connections import load_env_file, redact_secret, require_env
+from scripts.verify_connections import load_env_file, redact_secret, require_env, validate_url
 
 
 class VerifyConnectionsTests(unittest.TestCase):
@@ -28,6 +28,11 @@ class VerifyConnectionsTests(unittest.TestCase):
         os.environ.pop("MISSING_TEST_VAR", None)
         with self.assertRaises(RuntimeError):
             require_env("MISSING_TEST_VAR")
+
+    def test_validate_url(self):
+        self.assertEqual(validate_url("https://example.com/"), "https://example.com")
+        with self.assertRaises(RuntimeError):
+            validate_url("example.com")
 
 
 if __name__ == "__main__":
