@@ -2,28 +2,84 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="20dp">
+
+        <LinearLayout
+            android:id="@+id/headerContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <FrameLayout
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:background="@drawable/app_logo_badge"
+                android:foregroundGravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/logo_mark"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/appTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/app_name"
+                android:textAppearance="@android:style/TextAppearance.Material.Headline"
+                android:textColor="#1A1A1A"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/appSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/subtitle"
+                android:textAppearance="@android:style/TextAppearance.Material.Body1"
+                android:textColor="#666666" />
+        </LinearLayout>
 
         <EditText
             android:id="@+id/odooUrl"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="Odoo URL (https://...)"
+            android:layout_marginTop="20dp"
+            android:autofillHints="url"
+            android:hint="@string/hint_odoo_url"
+            android:importantForAutofill="yes"
             android:inputType="textUri"
+            android:maxLines="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/headerContainer" />
 
         <EditText
             android:id="@+id/odooDb"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="Odoo DB"
+            android:layout_marginTop="8dp"
+            android:autofillHints="username"
+            android:hint="@string/hint_odoo_db"
+            android:importantForAutofill="yes"
+            android:inputType="text"
+            android:maxLines="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/odooUrl" />
@@ -32,7 +88,12 @@
             android:id="@+id/odooUsername"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="Odoo Username"
+            android:layout_marginTop="8dp"
+            android:autofillHints="username,emailAddress"
+            android:hint="@string/hint_odoo_username"
+            android:importantForAutofill="yes"
+            android:inputType="textEmailAddress"
+            android:maxLines="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/odooDb" />
@@ -41,8 +102,12 @@
             android:id="@+id/odooApiKey"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="Odoo API Key"
+            android:layout_marginTop="8dp"
+            android:autofillHints="password"
+            android:hint="@string/hint_odoo_api_key"
+            android:importantForAutofill="yes"
             android:inputType="textPassword"
+            android:maxLines="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/odooUsername" />
@@ -51,8 +116,12 @@
             android:id="@+id/openaiApiKey"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="OpenAI API Key"
+            android:layout_marginTop="8dp"
+            android:autofillHints="password"
+            android:hint="@string/hint_openai_api_key"
+            android:importantForAutofill="yes"
             android:inputType="textPassword"
+            android:maxLines="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/odooApiKey" />
@@ -61,7 +130,8 @@
             android:id="@+id/checkButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Check Connections"
+            android:layout_marginTop="18dp"
+            android:text="@string/check_connections"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/openaiApiKey" />
@@ -71,7 +141,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Result will appear here"
+            android:paddingBottom="20dp"
+            android:text="@string/result_placeholder"
+            android:textAppearance="@android:style/TextAppearance.Material.Body1"
+            android:textColor="#1A1A1A"
             android:textIsSelectable="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
